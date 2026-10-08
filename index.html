@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Weather & Climate Risk</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="edge" aria-hidden="true"></div>
+<button id="handle" aria-label="Open day planner">Day planner</button>
+
+<aside id="drawer" aria-label="Day planner">
+  <h3>Day planner <button id="closeDrawer" aria-label="Close planner">✕</button></h3>
+  <p class="mut" id="planDate"></p>
+  <div class="tabs"><button class="on" data-p="pPlan">Plan</button><button data-p="pWatch">Watch</button><button data-p="pDiet">Diet</button></div>
+  <div class="pane" id="pPlan">
+
+  <div class="rings">
+    <div class="ringw"><svg viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="40"/><circle id="rMove" cx="50" cy="50" r="40" stroke="#ff6b6b" stroke-dasharray="251.3" stroke-dashoffset="251.3"/></svg><b id="vMove">0 min</b>Move</div>
+    <div class="ringw"><svg viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="40"/><circle id="rWater" cx="50" cy="50" r="40" stroke="#6cb8ff" stroke-dasharray="251.3" stroke-dashoffset="251.3"/></svg><b id="vWater">0 / 8</b>Water</div>
+    <div class="ringw"><svg viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="40"/><circle id="rTasks" cx="50" cy="50" r="40" stroke="#5ad67d" stroke-dasharray="251.3" stroke-dashoffset="251.3"/></svg><b id="vTasks">0 / 0</b>Tasks</div>
+  </div>
+  <div class="bar" style="margin-bottom:14px">
+    <button id="addWater">+ Glass of water</button>
+    <button id="enableAlerts" class="pri">Turn on alerts</button>
+  </div>
+
+  <h3>Suggested for today</h3>
+  <div id="suggest" class="mut">Loading forecast…</div>
+
+  <h3 style="margin-top:18px">Schedule a task</h3>
+  <div class="f">
+    <input id="tTitle" placeholder="What do you want to do?" maxlength="60">
+    <div class="row2">
+      <input id="tTime" type="datetime-local">
+      <select id="tType">
+        <option value="out">Outdoor</option>
+        <option value="in">Indoor</option>
+        <option value="run">Run / workout</option>
+      </select>
+    </div>
+    <div class="row2">
+      <select id="tRemind">
+        <option value="0">Alarm at start</option>
+        <option value="10">10 min before</option>
+        <option value="30">30 min before</option>
+      </select>
+      <button id="tAdd" class="pri">Add task</button>
+    </div>
+  </div>
+
+  <h3>My day</h3>
+  <div id="tasks"></div>
+  </div>
+
+  <div class="pane" id="pWatch" hidden>
+    <div class="watchwrap">
+      <div id="watch" data-wt="classic">
+        <div class="band"></div>
+        <div class="wface">
+          <div class="wtop"><span id="wIcon">☀️</span><span id="wTemp">--°</span></div>
+          <div class="wtime" id="wTime">--:--</div>
+          <div class="wdate" id="wDate"></div>
+          <svg class="wrings" viewBox="0 0 100 100" aria-hidden="true">
+            <circle class="wbg" cx="50" cy="50" r="44"/><circle class="wbg" cx="50" cy="50" r="34"/><circle class="wbg" cx="50" cy="50" r="24"/>
+            <circle id="wr1" class="w1" cx="50" cy="50" r="44"/><circle id="wr2" class="w2" cx="50" cy="50" r="34"/><circle id="wr3" class="w3" cx="50" cy="50" r="24"/>
+          </svg>
+          <div class="wstats"><span class="s1">Move <b id="wM">0 min</b></span><span class="s2">Water <b id="wW">0/8</b></span><span class="s3">Food <b id="wC">set up</b></span></div>
+          <div class="wrisk" id="wRisk"></div>
+        </div>
+        <div class="band"></div>
+      </div>
+    </div>
+    <h3>Watch theme</h3>
+    <div class="wthemes" id="wthemes"></div>
+    <p class="mut" style="font-size:13px">The rings fill as you finish workouts, drink water and log food. Add workouts in the Plan tab and food in the Diet tab.</p>
+  </div>
+
+  <div class="pane" id="pDiet" hidden>
+    <h3>Your details</h3>
+    <div class="f">
+      <div class="row2"><input id="dW" type="number" placeholder="Weight (kg)" min="30" max="250"><input id="dH" type="number" placeholder="Height (cm)" min="120" max="230"></div>
+      <div class="row2"><input id="dA" type="number" placeholder="Age" min="10" max="90"><select id="dS"><option value="f">Female</option><option value="m">Male</option></select></div>
+      <select id="dAct"><option value="1.2">Little or no exercise</option><option value="1.375" selected>Light (1–3 days/week)</option><option value="1.55">Moderate (3–5 days/week)</option><option value="1.725">Very active (6–7 days/week)</option></select>
+      <div class="row2"><select id="dG"><option value="lose">Lose weight</option><option value="maintain" selected>Maintain weight</option><option value="gain">Gain weight</option></select><select id="dT"><option value="v">Vegetarian</option><option value="n">Non-vegetarian</option></select></div>
+      <button id="dCalc" class="pri">Calculate my targets</button>
+    </div>
+    <div id="dRes"></div>
+    <h3 style="margin-top:14px">Meal ideas</h3>
+    <div id="dMeals"></div>
+    <h3 style="margin-top:14px">Log what you eat</h3>
+    <div class="f">
+      <select id="fSel"></select>
+      <div class="row2"><input id="fQty" type="number" value="1" min="0.5" max="10" step="0.5" aria-label="Servings"><button id="fAdd" class="pri">Add food</button></div>
+    </div>
+    <div id="fBars"></div>
+    <div id="fLog"></div>
+    <p class="mut" style="font-size:12px">Food values are approximate. These targets are a general guide and not medical advice. If you have a health condition, ask a doctor or dietitian.</p>
+  </div>
+</aside>
+
+<header>
+  <h1>🌦 Weather &amp; Climate Risk</h1>
+  <div class="bar">
+    <div class="search">
+      <input id="q" placeholder="Search for location" autocomplete="off" aria-label="Search for location">
+      <div id="results"></div>
+    </div>
+    <button id="geo" title="Use my location" aria-label="Use my location">📍</button>
+    <select id="theme" aria-label="Theme"><option value="dark">Theme: Dark</option><option value="light">Theme: Light</option></select>
+    <div class="bellwrap"><button id="bell" aria-label="Notifications" title="Notifications">🔔<span id="badge"></span></button><div id="notifPanel" hidden></div></div>
+    <div class="bellwrap"><button id="dl" aria-label="Download today's report" title="Download today's report">⬇</button><div id="dlMenu" hidden><button data-dl="html">📄 Day report (.html)</button><button data-dl="csv">📊 Hourly data (.csv)</button></div></div>
+    <button id="unit">°C</button>
+  </div>
+</header>
+
+<main>
+  <h2 id="place">Loading…</h2>
+  <div id="alert" role="alert"></div>
+
+  <section id="current" class="card">
+    <h3>Current weather</h3>
+    <div class="mut" id="clock"></div>
+    <div class="now">
+      <div class="ic" id="ico">☀️</div>
+      <div class="t" id="temp">--</div>
+      <div><div style="font-size:26px;font-weight:600" id="desc">--</div><div class="mut" id="feels"></div><div class="mut" id="hilo"></div></div>
+    </div>
+    <div class="stats" id="stats"></div>
+    <div class="summary" id="summary"></div>
+  </section>
+
+  <section id="hourly" class="card">
+    <h3>Your day, hour by hour</h3>
+    <svg id="chart" class="chart" viewBox="0 0 960 170" preserveAspectRatio="none"></svg>
+    <div class="hours" id="hours"></div>
+    <div class="legend"><span style="--c:var(--good)">Good for outdoors</span><span style="--c:var(--fair)">Fair</span><span style="--c:var(--poor)">Poor</span></div>
+  </section>
+
+  <section id="risk" class="card">
+    <h3>Risks in the next 24 hours</h3>
+    <div class="risks" id="risks"></div>
+  </section>
+
+  <section id="details" class="card">
+    <h3>Best time to go out</h3>
+    <div id="acts"></div>
+  </section>
+
+  <section id="maps" class="card">
+    <h3>Weather maps</h3>
+    <div id="mapbox">
+      <div class="maptools">
+        <button data-m="radar" class="on">🌧 Radar</button>
+        <button data-m="sat">🛰 Clouds</button>
+        <button data-m="img">🌍 Satellite view</button>
+        <button id="play">▶ Play</button>
+        <button id="mapFull">⛶ Full screen</button>
+        <button id="mapHome">⌖ My location</button>
+      </div>
+      <div id="map"></div>
+      <div class="ts" id="mapTs"></div>
+    </div>
+    <p class="mut" id="mapNote" style="font-size:13px;margin:10px 0 0">Scroll, pinch or use +/− to zoom. Drag to move.</p>
+  </section>
+
+  <section id="trends" class="card">
+    <h3>Next 7 days</h3>
+    <div class="hours" id="days"></div>
+  </section>
+</main>
+
+<nav>
+  <a href="#current" class="on">☀️<br>Current</a>
+  <a href="#risk">⚠️<br>Risk</a>
+  <a href="#hourly">🕒<br>Hourly</a>
+  <a href="#details">🏃<br>Plan</a>
+  <a href="#maps">🗺<br>Maps</a>
+  <a href="#trends">📈<br>Week</a>
+</nav>
+
+<div id="toasts"></div>
+
+<div id="modal" role="alertdialog" aria-live="assertive">
+  <div class="box">
+    <div class="big">⏰</div>
+    <h2 id="mTitle" style="margin:8px 0">Task</h2>
+    <p id="mBody" class="mut"></p>
+    <div class="btns">
+      <button id="mSnooze">Snooze 5 min</button>
+      <button id="mDone" class="pri">Mark done</button>
+      <button id="mClose">Dismiss</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
